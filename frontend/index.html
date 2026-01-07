@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Face Mask Detection - Login</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="auth-form">
+      <h2 id="form-title">Login</h2>
+
+      <div class="input-group">
+        <input id="username" placeholder="Username" />
+      </div>
+
+      <div class="input-group">
+        <input id="password" type="password" placeholder="Password" />
+      </div>
+
+      <div class="button-group">
+        <button id="auth-btn" onclick="handleAuth()">Login</button>
+      </div>
+
+      <div class="switch-mode">
+        <p>
+          <span id="switch-text">Don't have an account?</span>
+          <a href="#" id="switch-link" onclick="switchMode()">Register now</a>
+        </p>
+      </div>
+
+      <div id="msg" class="message"></div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+</body>
+
+</html>

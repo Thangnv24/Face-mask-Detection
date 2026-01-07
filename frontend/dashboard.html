@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard - Face Mask Detection</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .result-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .mode-btn {
+      padding: 8px 16px;
+      border: 1px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .mode-btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 15px;
+      display: none;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #webcam-video,
+    #uploaded-video {
+      width: 100%;
+      display: block;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    #result-image {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .badge-mask {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-no-mask {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #667eea;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" style="max-width: 600px;">
+    <div class="auth-form">
+      <h2 style="margin-bottom: 20px; text-align: center;">Face Mask Detection</h2>
+
+      <div class="mode-selector">
+        <button class="mode-btn active" onclick="switchInputMode('image')">Image</button>
+        <button class="mode-btn" onclick="switchInputMode('video')">Video</button>
+        <button class="mode-btn" onclick="switchInputMode('webcam')">Webcam</button>
+      </div>
+
+      <div id="image-input-area">
+        <div class="input-group">
+          <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 500;">Select image from
+            computer:</label>
+          <div class="custom-file-input">
+            <input type="file" id="file" accept="image/*" onchange="updateFileName(this, 'file-name')" />
+            <label for="file" class="file-label">Choose File</label>
+            <span id="file-name" class="file-name">No file selected</span>
+          </div>
+        </div>
+        <div class="button-group">
+          <button onclick="uploadImage()" id="upload-btn">Analyze</button>
+        </div>
+      </div>
+
+      <div id="video-input-area" style="display: none;">
+        <div class="input-group">
+          <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 500;">Select video from
+            computer:</label>
+          <div class="custom-file-input">
+            <input type="file" id="video-file" accept="video/*" onchange="updateFileName(this, 'video-file-name')" />
+            <label for="video-file" class="file-label">Choose File</label>
+            <span id="video-file-name" class="file-name">No file selected</span>
+          </div>
+        </div>
+        <div class="video-container" id="video-display-container">
+          <video id="uploaded-video" controls></video>
+          <canvas id="video-overlay" class="video-overlay"></canvas>
+        </div>
+        <div class="button-group">
+          <button onclick="processVideo()" id="process-video-btn">Start Detection</button>
+          <button onclick="stopVideoProcessing()" id="stop-video-btn"
+            style="display: none; background: #e53e3e;">Stop</button>
+        </div>
+      </div>
+
+      <div id="webcam-input-area" style="display: none;">
+        <div class="video-container" id="webcam-container" style="display: block;">
+          <video id="webcam-video" autoplay playsinline></video>
+          <canvas id="webcam-overlay" class="video-overlay"></canvas>
+        </div>
+        <div class="button-group">
+          <button onclick="startWebcam()" id="start-webcam-btn">Start Webcam</button>
+          <button onclick="stopWebcam()" id="stop-webcam-btn" style="display: none; background: #e53e3e;">Stop
+            Webcam</button>
+        </div>
+      </div>
+
+      <canvas id="process-canvas" style="display: none;"></canvas>
+
+      <div id="loading">
+        <div class="spinner"></div>
+        <span style="color: #667eea; font-weight: bold;">Processing...</span>
+      </div>
+
+      <div id="result-card" class="result-card">
+        <div style="text-align: center;">
+          <img id="result-image" src="" alt="Prediction Result" />
+        </div>
+        <div id="result-info" style="border-top: 1px solid #eee; padding-top: 15px;"></div>
+
+        <details style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+          <summary style="cursor: pointer; color: #888; font-size: 12px; outline: none;">View JSON Data Details
+          </summary>
+          <pre id="result-json"
+            style="font-size: 11px; max-height: 150px; overflow: auto; background: #fafafa; border: 1px solid #eee; margin-top: 10px; padding: 10px; border-radius: 4px;"></pre>
+        </details>
+      </div>
+
+      <div style="text-align: center; margin-top: 25px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+        <a href="/index.html" onclick="localStorage.removeItem('token')"
+          style="color: #667eea; text-decoration: none; font-size: 14px; font-weight: 600;">&larr; Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/upload.js"></script>
+</body>
+
+</html>

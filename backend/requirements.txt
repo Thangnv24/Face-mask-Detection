@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1
+minio
+pillow
+numpy<2.0.0
+tensorflow
+python-dotenv
+opencv-python
+pydantic-settings
+protobuf==4.25.3
+ultralytics
