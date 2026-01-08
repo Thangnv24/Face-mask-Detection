@@ -1,7 +1,7 @@
 # Face Mask Detection System
 
 Hệ thống nhận diện khẩu trang thời gian thực sử dụng Deep Learning và Computer Vision. Có thể phát hiện khuôn mặt và phân loại người đeo/không đeo khẩu trang qua hình ảnh hoặc webcam.
-
+![alt text](image-2.png)
 ## 🎯 Tính năng chính
 
 - ✅ **Nhận diện khuôn mặt**: Sử dụng DNN model để detect faces
