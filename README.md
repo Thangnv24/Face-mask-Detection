@@ -2,6 +2,13 @@
 
 Hệ thống nhận diện khẩu trang thời gian thực sử dụng Deep Learning và Computer Vision. Có thể phát hiện khuôn mặt và phân loại người đeo/không đeo khẩu trang qua hình ảnh hoặc webcam.
 ![alt text](image-2.png)
+## Tính năng tracking / Session management
+- Sử dụng thuật toán BoT-SORT (Bottom-up Top-down SORT) từ Ultralytics
+- Track ID 5 history over last 5 frames (Kalman Filter)
+- Sử dụng session ID để cho phép Tracker nhận diện được luồng dữ liệu từ cùng một người dùng dù giao thức truyền tải là không trạng thái
+- Quá trình Tracking chỉ tiêu tốn thêm khoảng 5-10ms mỗi khung hình, đảm bảo real time 
+
+
 ## 🎯 Tính năng chính
 
 - ✅ **Nhận diện khuôn mặt**: Sử dụng DNN model để detect faces
