@@ -8,6 +8,7 @@ let currentMode = 'image';
 let isProcessing = false;
 let webcamStream = null;
 let videoInterval = null;
+let sessionId = null;  // Session ID for tracking
 
 const elements = {
   uploadBtn: () => document.getElementById("upload-btn"),
@@ -77,6 +78,10 @@ function processVideo() {
     document.getElementById('video-display-container').style.display = 'block';
   }
 
+  // Generate new session ID for this video processing session
+  sessionId = crypto.randomUUID();
+  console.log('[Tracking] Started video session:', sessionId);
+
   isProcessing = true;
   document.getElementById('process-video-btn').style.display = 'none';
   document.getElementById('stop-video-btn').style.display = 'inline-block';
@@ -92,6 +97,12 @@ function stopVideoProcessing() {
   document.getElementById('process-video-btn').style.display = 'inline-block';
   document.getElementById('stop-video-btn').style.display = 'none';
   if (videoInterval) clearTimeout(videoInterval);
+
+  // Clear session ID
+  if (sessionId) {
+    console.log('[Tracking] Stopped video session:', sessionId);
+    sessionId = null;
+  }
 }
 
 // Webcam Logic
@@ -103,6 +114,10 @@ async function startWebcam() {
     document.getElementById('webcam-container').style.display = 'block';
     document.getElementById('start-webcam-btn').style.display = 'none';
     document.getElementById('stop-webcam-btn').style.display = 'inline-block';
+
+    // Generate new session ID for this webcam session
+    sessionId = crypto.randomUUID();
+    console.log('[Tracking] Started webcam session:', sessionId);
 
     isProcessing = true;
     startDetectionLoop(video, elements.webcamOverlay());
@@ -123,6 +138,12 @@ function stopWebcam() {
   document.getElementById('start-webcam-btn').style.display = 'inline-block';
   document.getElementById('stop-webcam-btn').style.display = 'none';
   if (videoInterval) clearTimeout(videoInterval);
+
+  // Clear session ID
+  if (sessionId) {
+    console.log('[Tracking] Stopped webcam session:', sessionId);
+    sessionId = null;
+  }
 }
 
 async function startDetectionLoop(videoSource, overlayCanvas) {
@@ -215,6 +236,11 @@ async function sendFrame(blob, isLive = false) {
 
   const formData = new FormData();
   formData.append("file", blob, "frame.jpg");
+
+  // Add session_id for tracking if in live mode (webcam/video)
+  if (isLive && sessionId) {
+    formData.append("session_id", sessionId);
+  }
 
   const endpoint = isLive ? "/predict/from-file-json" : "/predict/from-file";
 
